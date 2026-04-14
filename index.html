@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>宇宙郵局：星際包裹觀測站</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; 
+            background: linear-gradient(-45deg, #fdfaf3, #e6f0ef, #d6e5e3, #fdfaf3);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; 
+            color: #1a2a4c; 
+        }
+        h1, button, #pixel-status { font-family: 'VT323', monospace; }
+
+        #ui-layer { position: absolute; top: 30px; left: 40px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        h1 { background: rgba(255, 255, 255, 0.9); padding: 5px 25px; border-radius: 50px; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 0; }
+
+        #button-container { display: flex; gap: 15px; margin-top: 10px; }
+        button { 
+            background: rgba(230, 240, 239, 0.8); color: #5c7c99; border: 2px solid #5c7c99; 
+            padding: 8px 25px; cursor: pointer; border-radius: 50px; font-size: 22px; 
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px);
+        }
+        button:hover { 
+            background: #5c7c99; color: white; transform: scale(1.1); 
+            box-shadow: 0 5px 15px rgba(92, 124, 153, 0.4);
+        }
+        button.active { 
+            background: #1a2a4c; color: #fdfaf3; border-color: #1a2a4c; 
+            box-shadow: 0 0 15px rgba(26, 42, 76, 0.5);
+        }
+
+        #pixel-status { color: #5c7c99; font-size: 18px; letter-spacing: 1px; }
+
+        /* 像素掛飾 */
+        .pixel-charm { position: absolute; image-rendering: pixelated; z-index: 50; transition: transform 0.3s; cursor: pointer; }
+        #cat-charm {
+            width: 50px; height: 50px; top: 130px; left: 50px;
+            background-color: #ffccbb; border-radius: 10px; /* 這裡之後換成你的像素貓圖片 */
+            animation: float 3s ease-in-out infinite;
+        }
+        #alien-charm {
+            width: 40px; height: 40px; bottom: 60px; right: 60px;
+            background-color: #6ed3cf; border-radius: 50%;
+            animation: float 4s ease-in-out 1s infinite;
+        }
+        #cat-charm:hover { filter: drop-shadow(0 0 15px #ffccbb) brightness(1.1); }
+        #alien-charm:hover { filter: drop-shadow(0 0 15px #6ed3cf) brightness(1.1); }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 20px 50px rgba(26, 42, 76, 0.1), 0 0 0 rgba(110, 211, 207, 0); }
+            100% { box-shadow: 0 20px 50px rgba(26, 42, 76, 0.1), 0 0 25px rgba(110, 211, 207, 0.5); }
+        }
+
+        /* 展區框架 */
+        #display-frame {
+            position: absolute; top: 20vh; left: 5vw; width: 90vw; height: 75vh;
+            border: 4px solid #ffffff; border-radius: 35px;
+            backdrop-filter: blur(15px); background: rgba(255, 255, 255, 0.3);
+            overflow: hidden; z-index: 80;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; justify-content: center; align-items: center;
+            animation: pulse-glow 3s infinite alternate ease-in-out;
+        }
+        
+        iframe { 
+            width: 98%; height: 96%; border: none; border-radius: 20px; 
+            background: white; transform: scale(1); transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-layer">
+        <h1>Cosmic Post Office</h1>
+        <div id="button-container">
+            <button id="btn1" onclick="changeWeek('1/index.html', 'btn1')">PARCEL 01</button>
+            <button id="btn2" onclick="changeWeek('2/index.html', 'btn2')">PARCEL 02</button>
+        </div>
+        <div id="pixel-status">Status: Satellite Ready</div>
+    </div>
+    
+    <div id="cat-charm" class="pixel-charm" title="貓咪監控中"></div>
+    <div id="alien-charm" class="pixel-charm" title="不明生物"></div>
+
+    <div id="display-frame">
+        <iframe src="about:blank" name="content-iframe" id="target-iframe"></iframe>
+    </div>
+
+    <script src="sketch.js"></script>
+    <script>
+        function changeWeek(url, btnId) {
+            let frame = document.getElementById('display-frame');
+            let status = document.getElementById('pixel-status');
+            
+            // 執行「收包裹」動畫
+            frame.style.opacity = "0";
+            frame.style.transform = "scale(0.9) translateY(30px)";
+            frame.style.filter = "blur(10px)";
+            status.innerText = "Status: Transporting Data...";
+
+            setTimeout(() => {
+                document.getElementById('target-iframe').src = url;
+                
+                setTimeout(() => {
+                    frame.style.opacity = "1";
+                    frame.style.transform = "scale(1) translateY(0)";
+                    frame.style.filter = "blur(0px)";
+                    status.innerText = `Status: Parcel ${btnId.slice(-1)} Delivered.`;
+                }, 400);
+            }, 300);
+
+            // 更新按鈕狀態
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // 預設載入第一個包裹
+        window.onload = function() {
+            changeWeek('1/index.html', 'btn1');
+        };
+    </script>
+</body>
+</html>
